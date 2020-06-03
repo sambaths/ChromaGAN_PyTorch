@@ -5,7 +5,7 @@ import numpy as np
 
 class DATA():
     def __init__(self, dirname):
-        self.dir_path = os.path.join(config.DATA_DIR, dirname)
+        self.dir_path = dirname
         self.filelist = os.listdir(self.dir_path)
         self.batch_size = config.BATCH_SIZE
         self.size = len(self.filelist)

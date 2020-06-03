@@ -1,17 +1,19 @@
+USE_TPU = False
+MULTI_CORE = False
+
 import os
 import torch
 
-ROOT_DIR = os.path.abspath('')
-DATA_DIR = os.path.join(ROOT_DIR, 'input/')
-OUT_DIR = os.path.join(ROOT_DIR, 'result/')
-MODEL_DIR = os.path.join(ROOT_DIR, 'models/')
-CHECKPOINT_DIR = os.path.join(ROOT_DIR, 'checkpoint/')
+DATA_DIR = 'input/'
+OUT_DIR = 'result/'
+MODEL_DIR = 'models/'
+CHECKPOINT_DIR = 'checkpoint/'
 
-TRAIN_DIR = "train/"  # UPDATE
-TEST_DIR = "test/" # UPDATE
+TRAIN_DIR = DATA_DIR+"train/"  # UPDATE
+TEST_DIR = DATA_DIR+"test/" # UPDATE
 
-os.makedirs(DATA_DIR+TRAIN_DIR, exist_ok=True)
-os.makedirs(DATA_DIR+TEST_DIR, exist_ok=True)
+os.makedirs(TRAIN_DIR, exist_ok=True)
+os.makedirs(TEST_DIR, exist_ok=True)
 
 # DATA INFORMATION
 IMAGE_SIZE = 224
@@ -21,7 +23,13 @@ NUM_EPOCHS = 10
 KEEP_CKPT = 1
 # save_model_path = MODEL_DIR
 
-if torch.cuda.is_available():
-  DEVICE = torch.device('cuda')
-else:
-  DEVICE = 'cpu'
+if USE_TPU:
+  import torch_xla.core.xla_model as xm
+  if not MULTI_CORE:
+    DEVICE = xm.xla_device()
+
+if not USE_TPU:
+  if torch.cuda.is_available():
+    DEVICE = torch.device('cuda')
+  else:
+    DEVICE = 'cpu'
