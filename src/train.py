@@ -85,18 +85,7 @@ def map_fn(index=None, flags=None):
     else:
       engine.train(train_loader, netGAN, netD, VGG_modelF, optG, optD, device=DEVICE, losses=losses)
     #########################CHECKPOINTING#################################
-    checkpoint = {
-          'epoch' : epoch,
-          'generator_state_dict' :netG.state_dict(),
-          'generator_optimizer': optG.state_dict(),
-          'discriminator_state_dict': netD.state_dict(),
-          'discriminator_optimizer': optD.state_dict()
-      }
-    if config.USE_TPU:
-      xm.save(checkpoint, f'{config.CHECKPOINT_DIR}{epoch}_checkpoint.pt')
-    else:
-      torch.save(checkpoint, f'{config.CHECKPOINT_DIR}{epoch}_checkpoint.pt')
-    del checkpoint
+    utils.create_checkpoint(epoch, netG, optG, netD, optD, max_checkpoint=config.KEEP_CKPT, save_path = config.CHECKPOINT_DIR)
     ########################################################################
     utils.plot_some(train_data, netG, DEVICE, epoch)
     gc.collect()

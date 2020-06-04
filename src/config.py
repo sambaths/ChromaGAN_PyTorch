@@ -23,7 +23,7 @@ IMAGE_SIZE = 224
 BATCH_SIZE = 1
 GRADIENT_PENALTY_WEIGHT = 10
 NUM_EPOCHS = 10
-KEEP_CKPT = 1
+KEEP_CKPT = 2
 # save_model_path = MODEL_DIR
 
 if USE_TPU:
@@ -36,3 +36,5 @@ if not USE_TPU:
     DEVICE = torch.device('cuda')
   else:
     DEVICE = 'cpu'
+
+

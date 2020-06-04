@@ -3,6 +3,7 @@ import os
 import cv2
 import torch
 import config
+import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -81,38 +82,24 @@ def plot_some(test_data, colorization_model, device, epoch):
       imag_gird(0, orig, batchL, preds, epoch)
       plt.show()
 
-def keep_ckpt(no_of_ckpts_to_keep, MODEL_DIR):
-  if len(os.listdir(MODEL_DIR)) > no_of_ckpts_to_keep:
-    folder_list = pd.Series(os.listdir(MODEL_DIR)).apply(int).values
-    folder_list = np.sort(folder_list)[::-1]
-    keep_folder = folder_list[:no_of_ckpts_to_keep+1]
-    for value in folder_list:
-      if value not in keep_folder:
-        print(f'\nRemoving checkpoint from epoch {str(value)}')
-        shutil.rmtree(MODEL_DIR+str(value))
+def create_checkpoint(epoch, netG, optG, netD, optD, max_checkpoint, save_path=config.CHECKPOINT_DIR):
+  checkpoint = {
+        'epoch' : epoch,
+        'generator_state_dict' :netG.state_dict(),
+        'generator_optimizer': optG.state_dict(),
+        'discriminator_state_dict': netD.state_dict(),
+        'discriminator_optimizer': optD.state_dict()
+    }
+  if config.USE_TPU:
+    xm.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
+  else:
+    torch.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
+  del checkpoint
+  files = glob.glob(os.path.expanduser(f"{save_path}*"))
+  sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
+  if len(sorted_files) > max_checkpoint:
+    os.remove(sorted_files[-1])
 
-def save_ckp(state, MODEL_DIR, fname, intermediate=False):#, best_model_dir):
-    f_path = f'{MODEL_DIR}{state["epoch"]}/'
-    if intermediate:
-      f_path = f'{MODEL_DIR}{state["epoch"]}/checkpoint_{state["batch"]}/'
-    try:
-      os.makedirs(f'{f_path}', exist_ok=True)
-    except:
-      pass
-    try:  
-      print(f'Saving Checkpoint to {f_path}{fname}')
-      if use_tpu:
-        xm.save(state, f'{f_path}{fname}')
-      else:
-        torch.save(state, f'{f_path}{fname}')
-    except:
-      print(f"Couldn't save the model at the specified location. Trying to save to current directory. !!")
-      if use_tpu:
-        xm.save(state, f'{f_path}{fname}')
-      else:
-        torch.save(state, f'{fname}')
-
-      print('Saved Model in the current directory.')
 
 def plot_gan_loss(G_losses, D_losses):
   plt.figure(figsize=(10,5))
