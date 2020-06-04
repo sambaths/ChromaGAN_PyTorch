@@ -1,9 +1,11 @@
 import config
 
 import torch
+import numpy as np
+from tqdm import tqdm
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
+
 
 if config.USE_TPU:
   import torch_xla

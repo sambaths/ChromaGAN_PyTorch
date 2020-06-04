@@ -39,7 +39,7 @@ def reconstruct_no(batchX, predictedY):
     return result
 
 
-def imag_gird(axrow, orig, batchL, preds):
+def imag_gird(axrow, orig, batchL, preds, epoch):
   fig , ax = plt.subplots(1,3, figsize=(15,15))
   ax[0].imshow(orig)
   ax[0].set_title('Original Image')
@@ -52,7 +52,7 @@ def imag_gird(axrow, orig, batchL, preds):
   plt.savefig(f'sample_preds_{epoch}')
   # plt.show()
 
-def plot_some(test_data, colorization_model, device):
+def plot_some(test_data, colorization_model, device, epoch):
   with torch.no_grad():
     indexes = [0, 2, 9]
     for idx in indexes:
@@ -78,7 +78,7 @@ def plot_some(test_data, colorization_model, device):
       orig = cv2.resize(cv2.cvtColor(orig, cv2.COLOR_BGR2RGB), (224,224))
       # orig = reconstruct_no(preprocess(batchL), preprocess(realAB))
       preds = reconstruct_no(preprocess(batchL), preprocess(batch_predAB))
-      imag_gird(0, orig, batchL, preds)
+      imag_gird(0, orig, batchL, preds, epoch)
       plt.show()
 
 def keep_ckpt(no_of_ckpts_to_keep, MODEL_DIR):

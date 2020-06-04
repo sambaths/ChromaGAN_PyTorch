@@ -1,12 +1,17 @@
+
 import model
 import config
 import dataset
 import utils
 import engine
 
+import time
 import torch
 import torchvision
-import time
+import warnings
+warnings.filterwarnings('ignore')
+
+import gc
 
 if config.USE_TPU:
   import torch_xla
@@ -17,8 +22,7 @@ if config.USE_TPU:
 
 def map_fn(index=None, flags=None):
   torch.set_default_tensor_type('torch.FloatTensor')
-
-  torch.manual_seed(flags['seed'])
+  torch.manual_seed(1234)
   
   train_data = dataset.DATA(config.TRAIN_DIR) 
 
@@ -76,11 +80,10 @@ def map_fn(index=None, flags=None):
     if config.MULTI_CORE:
       para_train_loader = pl.ParallelLoader(train_loader, [DEVICE]).per_device_loader(DEVICE)
       engine.train(para_train_loader, netGAN, netD, VGG_modelF, optG, optD, device=DEVICE, losses=losses)
+      elapsed_train_time = time.time() - train_start
+      print("Process", index, "finished training. Train time was:", elapsed_train_time) 
     else:
       engine.train(train_loader, netGAN, netD, VGG_modelF, optG, optD, device=DEVICE, losses=losses)
-    elapsed_train_time = time.time() - train_start
-    print("Process", index, "finished training. Train time was:", elapsed_train_time) 
-
     #########################CHECKPOINTING#################################
     checkpoint = {
           'epoch' : epoch,
@@ -89,20 +92,26 @@ def map_fn(index=None, flags=None):
           'discriminator_state_dict': netD.state_dict(),
           'discriminator_optimizer': optD.state_dict()
       }
-    xm.save(checkpoint, f'{config.CHECKPOINT_DIR}{epoch}_checkpoint.pt')
+    if config.USE_TPU:
+      xm.save(checkpoint, f'{config.CHECKPOINT_DIR}{epoch}_checkpoint.pt')
+    else:
+      torch.save(checkpoint, f'{config.CHECKPOINT_DIR}{epoch}_checkpoint.pt')
     del checkpoint
     ########################################################################
-    utils.plot_some(train_data, netG, DEVICE)
+    utils.plot_some(train_data, netG, DEVICE, epoch)
+    gc.collect()
 # Configures training (and evaluation) parameters
-flags = {}
-flags['batch_size'] = config.BATCH_SIZE
-flags['num_workers'] = 8
-flags['num_epochs'] = config.NUM_EPOCHS
-flags['seed'] = 1234
-
 
 def run():
-    if config.MULTI_CORE:
-        xmp.spawn(map_fn, args=(flags,), nprocs=8, start_method='fork')
-    else:
-        map_fn()
+  if config.MULTI_CORE:
+      flags = {}
+      flags['batch_size'] = config.BATCH_SIZE
+      flags['num_workers'] = 8
+      flags['num_epochs'] = config.NUM_EPOCHS
+      flags['seed'] = 1234
+      xmp.spawn(map_fn, args=(flags,), nprocs=8, start_method='fork')
+  else:
+      map_fn()
+    # print(flags)
+if __name__=='__main__':
+  run()
