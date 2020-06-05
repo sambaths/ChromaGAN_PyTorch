@@ -7,6 +7,9 @@ import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
+if config.USE_TPU:
+  import torch_xla.core.xla_model as xm
+
 def preprocess(imgs):
   try:
     imgs = imgs.detach().numpy()
