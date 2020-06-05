@@ -83,6 +83,7 @@ def plot_some(test_data, colorization_model, device, epoch):
       plt.show()
 
 def create_checkpoint(epoch, netG, optG, netD, optD, max_checkpoint, save_path=config.CHECKPOINT_DIR):
+  print('Saving Model and Optimizer weights.....')
   checkpoint = {
         'epoch' : epoch,
         'generator_state_dict' :netG.state_dict(),
@@ -94,11 +95,44 @@ def create_checkpoint(epoch, netG, optG, netD, optD, max_checkpoint, save_path=c
     xm.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
   else:
     torch.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
+    print('Weights Saved !!')
   del checkpoint
   files = glob.glob(os.path.expanduser(f"{save_path}*"))
   sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
   if len(sorted_files) > max_checkpoint:
     os.remove(sorted_files[-1])
+
+
+
+def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
+    load_from_checkpoint = False
+    files = glob.glob(os.path.expanduser(f"{checkpoint_directory}*"))
+    for file in files:
+        if file.endswith('.pt'):
+            load_from_checkpoint=True
+            break
+
+    if load_from_checkpoint:
+        print('Loading Model and optimizer weights from checkpoint....')
+        sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
+        checkpoint = torch.load(f'{sorted_files[0]}')    
+        netG.load_state_dict(checkpoint['generator_state_dict'])
+        netG.to(device)
+
+        optG.load_state_dict(checkpoint['generator_optimizer'])
+
+        netD.load_state_dict(checkpoint['discriminator_state_dict'])
+        netD.to(device)
+
+        optD.load_state_dict(checkpoint['discriminator_optimizer'])
+        print('Loaded Weights !!!')
+        
+
+        return netG, optG, netD, optD
+    else:
+        print('There are no checkpoints in the mentioned directoy, the Model will train from sractch.')
+        return netG, optG, netD, optD
+    
 
 
 def plot_gan_loss(G_losses, D_losses):

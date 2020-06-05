@@ -56,7 +56,7 @@ def map_fn(index=None, flags=None):
 
   netG = netG.to(DEVICE)
   netD = netD.to(DEVICE)
-  netGAN = model.GAN(netG, netD)
+  
   VGG_modelF = VGG_modelF.to(DEVICE)
 
   optD = torch.optim.Adam(netD.parameters(), lr=2e-4, betas=(0.5, 0.999))
@@ -72,6 +72,8 @@ def map_fn(index=None, flags=None):
       'G_losses_eval' : []
   }
 
+  netG, optG, netD, optD = utils.load_checkpoint(config.CHECKPOINT_DIR, netG, optG, netD, optD, DEVICE)
+  netGAN = model.GAN(netG, netD)
   for epoch in range(flags['num_epochs'] if config.MULTI_CORE else config.NUM_EPOCHS):
     print('\n')
     print('#'*8,f'EPOCH-{epoch}','#'*8)
