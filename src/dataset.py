@@ -5,9 +5,9 @@ import numpy as np
 
 
 class DATA():
-    def __init__(self, dirname):
+    def __init__(self, dirname, max_len=None):
         self.dir_path = dirname
-        self.filelist = os.listdir(self.dir_path)
+        self.filelist = os.listdir(self.dir_path)[:max_len]
         self.batch_size = config.BATCH_SIZE
         self.size = len(self.filelist)
         self.data_index = 0
