@@ -72,9 +72,9 @@ def map_fn(index=None, flags=None):
       'G_losses_eval' : []
   }
 
-  netG, optG, netD, optD = utils.load_checkpoint(config.CHECKPOINT_DIR, netG, optG, netD, optD, DEVICE)
+  netG, optG, netD, optD, epoch_checkpoint = utils.load_checkpoint(config.CHECKPOINT_DIR, netG, optG, netD, optD, DEVICE)
   netGAN = model.GAN(netG, netD)
-  for epoch in range(flags['num_epochs'] if config.MULTI_CORE else config.NUM_EPOCHS):
+  for epoch in range(epoch_checkpoint,flags['num_epochs'] if config.MULTI_CORE else config.NUM_EPOCHS):
     print('\n')
     print('#'*8,f'EPOCH-{epoch}','#'*8)
     losses['EPOCH_G_losses'] = []

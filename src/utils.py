@@ -98,7 +98,7 @@ def create_checkpoint(epoch, netG, optG, netD, optD, max_checkpoint, save_path=c
     xm.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
   else:
     torch.save(checkpoint, f'{save_path}{epoch}_checkpoint.pt')
-    print('Weights Saved !!')
+  print('Weights Saved !!')
   del checkpoint
   files = glob.glob(os.path.expanduser(f"{save_path}*"))
   sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
@@ -118,7 +118,8 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
     if load_from_checkpoint:
         print('Loading Model and optimizer weights from checkpoint....')
         sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
-        checkpoint = torch.load(f'{sorted_files[0]}')    
+        checkpoint = torch.load(f'{sorted_files[0]}')
+        epoch_checkpoint = checkpoint['epoch']    
         netG.load_state_dict(checkpoint['generator_state_dict'])
         netG.to(device)
 
@@ -131,10 +132,11 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
         print('Loaded Weights !!!')
         
 
-        return netG, optG, netD, optD
+        return netG, optG, netD, optD, epoch_checkpoint
     else:
-        print('There are no checkpoints in the mentioned directoy, the Model will train from sractch.')
-        return netG, optG, netD, optD
+        print('There are no checkpoints in the mentioned directoy, the Model will train from scratch.')
+        epoch_checkpoint = 0
+        return netG, optG, netD, optD, epoch
     
 
 
