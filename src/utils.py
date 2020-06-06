@@ -120,7 +120,7 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
         print('Loading Model and optimizer states from checkpoint....')
         sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
         checkpoint = torch.load(f'{sorted_files[0]}')
-        epoch_checkpoint = checkpoint['epoch'] + 1   
+        epoch_checkpoint = checkpoint['epoch'] + 1
         netG.load_state_dict(checkpoint['generator_state_dict'])
         netG.to(device)
 
@@ -132,7 +132,7 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
         optD.load_state_dict(checkpoint['discriminator_optimizer'])
         print('Loaded States !!!')
         print(f'It looks like the this states belong to epoch {epoch_checkpoint-1}.')
-        print(f'so the model will train for {(epoch_checkpoint-1) - config.NUM_EPOCHS}.')
+        print(f'so the model will train for {config.NUM_EPOCHS - (epoch_checkpoint-1)} more epochs.')
         print(f'If you want to train for more epochs, change the "NUM_EPOCHS" in config.py !!')
         
 

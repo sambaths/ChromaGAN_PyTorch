@@ -81,7 +81,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
       discreal = netD(realLAB)
       D_x = discreal.mean().item()
 
-      weights = torch.randn((trainAB.size(0),1,1,1) device=device)          
+      weights = torch.randn((trainAB.size(0),1,1,1), device=device)          
       averaged_samples = (weights * trainAB ) + ((1 - weights) * predAB.detach())
       averaged_samples = torch.autograd.Variable(averaged_samples, requires_grad=True)
       avg_img = torch.cat([trainL, averaged_samples], dim=1)
