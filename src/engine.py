@@ -26,8 +26,8 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
 
   def gp_loss(y_pred, averaged_samples, gradient_penalty_weight):
 
-    gradients = torch.autograd.grad(y_pred,averaged_samples.to(device),
-                              grad_outputs=torch.ones(y_pred.size()).to(device),
+    gradients = torch.autograd.grad(y_pred,averaged_samples,
+                              grad_outputs=torch.ones(y_pred.size(), device=device),
                               create_graph=True, retain_graph=True, only_inputs=True)[0]
     gradients = gradients.view(gradients.size(0), -1)
     gradient_penalty = (((gradients+1e-16).norm(2, dim=1) - 1) ** 2).mean() * gradient_penalty_weight
@@ -35,11 +35,11 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
   for trainL, trainAB, _ in tqdm(iter(train_loader)):
       batch += 1  
 
-      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]))
+      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device)
 
-      trainL = torch.tensor(trainL).to(device).double()
-      trainAB = torch.tensor(trainAB).to(device).double()
-      trainL_3 = trainL_3.to(device).double()
+      trainL = torch.tensor(trainL, device=device).double()
+      trainAB = torch.tensor(trainAB, device=device).double()
+      # trainL_3 = trainL_3.to(device).double()
       
       predictVGG = F.softmax(VGG_MODEL(trainL_3))
 
@@ -81,7 +81,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
       discreal = netD(realLAB)
       D_x = discreal.mean().item()
 
-      weights = torch.randn((trainAB.size(0),1,1,1)).to(device)          
+      weights = torch.randn((trainAB.size(0),1,1,1) device=device)          
       averaged_samples = (weights * trainAB ) + ((1 - weights) * predAB.detach())
       averaged_samples = torch.autograd.Variable(averaged_samples, requires_grad=True)
       avg_img = torch.cat([trainL, averaged_samples], dim=1)

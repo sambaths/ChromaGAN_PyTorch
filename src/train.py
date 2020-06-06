@@ -39,8 +39,9 @@ def map_fn(index=None, flags=None):
       train_data,
       batch_size=flags['batch_size'] if config.MULTI_CORE else config.BATCH_SIZE,
       sampler=train_sampler,
-      num_workers=flags['num_workers'] if config.MULTI_CORE else 1,
-      drop_last=True)
+      num_workers=flags['num_workers'] if config.MULTI_CORE else 4,
+      drop_last=True,
+      pin_memory=True)
 
   if config.MULTI_CORE:
     DEVICE = xm.xla_device()
@@ -74,7 +75,7 @@ def map_fn(index=None, flags=None):
 
   netG, optG, netD, optD, epoch_checkpoint = utils.load_checkpoint(config.CHECKPOINT_DIR, netG, optG, netD, optD, DEVICE)
   netGAN = model.GAN(netG, netD)
-  for epoch in range(epoch_checkpoint,flags['num_epochs'] if config.MULTI_CORE else config.NUM_EPOCHS):
+  for epoch in range(epoch_checkpoint,flags['num_epochs']+1 if config.MULTI_CORE else config.NUM_EPOCHS+1):
     print('\n')
     print('#'*8,f'EPOCH-{epoch}','#'*8)
     losses['EPOCH_G_losses'] = []

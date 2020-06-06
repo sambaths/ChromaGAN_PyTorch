@@ -54,6 +54,7 @@ def imag_gird(axrow, orig, batchL, preds, epoch):
   ax[2].imshow(preds)
   ax[2].set_title('Pred Image')
   plt.savefig(f'sample_preds_{epoch}')
+  plt.close()
   # plt.show()
 
 def plot_some(test_data, colorization_model, device, epoch):
@@ -116,10 +117,10 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
             break
 
     if load_from_checkpoint:
-        print('Loading Model and optimizer weights from checkpoint....')
+        print('Loading Model and optimizer states from checkpoint....')
         sorted_files = sorted(files, key=lambda t: -os.stat(t).st_mtime)
         checkpoint = torch.load(f'{sorted_files[0]}')
-        epoch_checkpoint = checkpoint['epoch']    
+        epoch_checkpoint = checkpoint['epoch'] + 1   
         netG.load_state_dict(checkpoint['generator_state_dict'])
         netG.to(device)
 
@@ -129,14 +130,15 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
         netD.to(device)
 
         optD.load_state_dict(checkpoint['discriminator_optimizer'])
-        print('Loaded Weights !!!')
+        print('Loaded States !!!')
+        print(f'It looks like the this states belong to epoch {epoch_checkpoint-1}')
         
 
         return netG, optG, netD, optD, epoch_checkpoint
     else:
         print('There are no checkpoints in the mentioned directoy, the Model will train from scratch.')
-        epoch_checkpoint = 0
-        return netG, optG, netD, optD, epoch
+        epoch_checkpoint = 1
+        return netG, optG, netD, optD, epoch_checkpoint
     
 
 
