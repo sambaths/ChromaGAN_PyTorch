@@ -49,3 +49,4 @@ class DATA():
         batch = np.asarray(batch)/255 # values between 0 and 1
         labels = np.asarray(labels)/255 # values between 0 and 1
         return batch, labels, filelist
+

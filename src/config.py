@@ -1,5 +1,6 @@
 USE_TPU = False
 MULTI_CORE = False
+MIXED_PRECISION = False
 
 import os
 import torch
@@ -8,6 +9,7 @@ DATA_DIR = '../input/'
 OUT_DIR = '../result/'
 MODEL_DIR = '../models/'
 CHECKPOINT_DIR = '../checkpoint/'
+LOGS_DIR = '../logs/'
 
 TRAIN_DIR = DATA_DIR+"train/"  # UPDATE
 TEST_DIR = DATA_DIR+"test/" # UPDATE
@@ -17,6 +19,7 @@ os.makedirs(TEST_DIR, exist_ok=True)
 os.makedirs(MODEL_DIR, exist_ok=True)
 os.makedirs(CHECKPOINT_DIR, exist_ok=True)
 os.makedirs(OUT_DIR, exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 # DATA INFORMATION
 IMAGE_SIZE = 224
@@ -37,3 +40,6 @@ if not USE_TPU:
   else:
     DEVICE = 'cpu'
 
+DEVICE='cpu'
+if DEVICE=='cpu' and MIXED_PRECISION:
+  raise ValueError('To use mixed precision you need GPU')

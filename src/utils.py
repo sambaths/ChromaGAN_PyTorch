@@ -68,15 +68,15 @@ def plot_some(test_data, colorization_model, device, epoch):
       filepath = config.TRAIN_DIR+filename
       batchL = batchL.reshape(1,1,224,224)
       realAB = realAB.reshape(1,2,224,224)
-      batchL_3 = torch.tensor(np.tile(batchL, [1, 3, 1, 1]), dtype=torch.float, device=device)
-      batchL = torch.tensor(batchL, dtype=torch.float, device=device)
-      realAB = torch.tensor(realAB, dtype=torch.float, device=device)
+      batchL_3 = torch.tensor(np.tile(batchL, [1, 3, 1, 1]), dtype=torch.half if config.MIXED_PRECISION else torch.float, device=device)
+      batchL = torch.tensor(batchL, dtype=torch.half if config.MIXED_PRECISION else torch.float, device=device)
+      realAB = torch.tensor(realAB, dtype=torch.half if config.MIXED_PRECISION else torch.float, device=device)
 
       colorization_model.eval()
       batch_predAB, _ = colorization_model(batchL_3)
       img = cv2.imread(filepath)
-      batch_predAB = batch_predAB.cpu().numpy().reshape((224,224,2))
-      batchL = batchL.cpu().numpy().reshape((224,224,1))
+      batch_predAB = batch_predAB.cpu().float().numpy().reshape((224,224,2))
+      batchL = batchL.cpu().float().numpy().reshape((224,224,1))
       realAB = realAB.cpu().numpy().reshape((224,224,2))
       orig = cv2.imread(filepath)
       orig = cv2.resize(cv2.cvtColor(orig, cv2.COLOR_BGR2RGB), (224,224))
@@ -129,17 +129,18 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
         netD.to(device)
 
         optD.load_state_dict(checkpoint['discriminator_optimizer'])
+
         print('Loaded States !!!')
         print(f'It looks like this states belong to epoch {epoch_checkpoint-1}.')
         print(f'so the model will train for {config.NUM_EPOCHS - (epoch_checkpoint-1)} more epochs.')
         print(f'If you want to train for more epochs, change the "NUM_EPOCHS" in config.py !!')
         
 
-        return netG, optG, netD, optD, epoch_checkpoint
+        return netG.half() if config.MIXED_PRECISION else netG, optG, netD.half() if config.MIXED_PRECISION else netD, optD, epoch_checkpoint
     else:
         print('There are no checkpoints in the mentioned directoy, the Model will train from scratch.')
         epoch_checkpoint = 1
-        return netG, optG, netD, optD, epoch_checkpoint
+        return netG.half() if config.MIXED_PRECISION else netG, optG, netD.half() if config.MIXED_PRECISION else netD, optD, epoch_checkpoint
     
 
 

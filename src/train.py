@@ -19,9 +19,11 @@ if config.USE_TPU:
   import torch_xla.distributed.parallel_loader as pl
   import torch_xla.distributed.xla_multiprocessing as xmp
   
+if config.MIXED_PRECISION:
+  from optim import Adam16
 
 def map_fn(index=None, flags=None):
-  torch.set_default_tensor_type('torch.FloatTensor')
+  # torch.set_default_tensor_type('torch.FloatTensor')
   torch.manual_seed(1234)
   
   train_data = dataset.DATA(config.TRAIN_DIR) 
@@ -58,10 +60,16 @@ def map_fn(index=None, flags=None):
   netG = netG.to(DEVICE)
   netD = netD.to(DEVICE)
   
+  if config.MIXED_PRECISION:
+    VGG_modelF = VGG_modelF.half()
   VGG_modelF = VGG_modelF.to(DEVICE)
 
-  optD = torch.optim.Adam(netD.parameters(), lr=2e-4, betas=(0.5, 0.999))
-  optG = torch.optim.Adam(netG.parameters(), lr=2e-4, betas=(0.5, 0.999))
+  if config.MIXED_PRECISION:
+    optD = Adam16(netD.parameters(), lr=2e-4, betas=(0.5, 0.999))  
+    optG = Adam16(netG.parameters(), lr=2e-4, betas=(0.5, 0.999))  
+  else:
+    optD = torch.optim.Adam(netD.parameters(), lr=2e-4, betas=(0.5, 0.999)) 
+    optG = torch.optim.Adam(netG.parameters(), lr=2e-4, betas=(0.5, 0.999))
     
   ## Trains
   train_start = time.time()

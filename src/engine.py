@@ -14,7 +14,6 @@ if config.USE_TPU:
   import torch_xla.distributed.xla_multiprocessing as xmp
   
 
-
 def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
   batch = 0
 
@@ -27,7 +26,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
   def gp_loss(y_pred, averaged_samples, gradient_penalty_weight):
 
     gradients = torch.autograd.grad(y_pred,averaged_samples,
-                              grad_outputs=torch.ones(y_pred.size(), device=device),
+                              grad_outputs=torch.ones(y_pred.size(), device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float),
                               create_graph=True, retain_graph=True, only_inputs=True)[0]
     gradients = gradients.view(gradients.size(0), -1)
     gradient_penalty = (((gradients+1e-16).norm(2, dim=1) - 1) ** 2).mean() * gradient_penalty_weight
@@ -35,10 +34,10 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
   for trainL, trainAB, _ in tqdm(iter(train_loader)):
       batch += 1  
 
-      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device, dtype=torch.float)
+      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float)
 
-      trainL = torch.tensor(trainL, device=device, dtype=torch.float)
-      trainAB = torch.tensor(trainAB, device=device, dtype=torch.float)
+      trainL = torch.tensor(trainL, device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float)
+      trainAB = torch.tensor(trainAB, device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float)
       
       predictVGG = F.softmax(VGG_MODEL(trainL_3))
 
@@ -80,7 +79,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
       discreal = netD(realLAB)
       D_x = discreal.mean().item()
 
-      weights = torch.randn((trainAB.size(0),1,1,1), device=device)          
+      weights = torch.randn((trainAB.size(0),1,1,1), device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float)          
       averaged_samples = (weights * trainAB ) + ((1 - weights) * predAB.detach())
       averaged_samples = torch.autograd.Variable(averaged_samples, requires_grad=True)
       avg_img = torch.cat([trainL, averaged_samples], dim=1)
@@ -102,6 +101,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
 
       losses['D_losses'].append(Loss_D.item())
       losses['EPOCH_D_losses'].append(Loss_D.item())
+
       # Output training stats
       if batch % 100 == 0:
         print('Loss_D: %.8f | Loss_G: %.8f | D(x): %.8f | D(G(z)): %.8f / %.8f | MSE: %.8f | KLD: %.8f | WGAN_F(G): %.8f | WGAN_F(D): %.8f | WGAN_R(D): %.8f | WGAN_A(D): %.8f'
