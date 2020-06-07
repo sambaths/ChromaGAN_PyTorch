@@ -89,12 +89,12 @@ class colorization_model(nn.Module):
     global_features = self.relu(self.global_features_conv1(vgg_out))  #[None, 512, 14, 14]
     global_features = self.global_features_bn1(global_features) #[None, 512, 14, 14]
     global_features = self.relu(self.global_features_conv2(global_features)) #[None, 512, 14, 14]
-    global_features = self.global_features_bn2(global_features) #[None, 512, 14, 14]
+    # global_features = self.global_features_bn2(global_features) #[None, 512, 14, 14]
 
     global_features = self.relu(self.global_features_conv3(global_features)) #[None, 512, 7, 7]
     global_features = self.global_features_bn3(global_features)  #[None, 512, 7, 7]
     global_features = self.relu(self.global_features_conv4(global_features)) #[None, 512, 7, 7]
-    global_features = self.global_features_bn4(global_features) #[None, 512, 7, 7]
+    # global_features = self.global_features_bn4(global_features) #[None, 512, 7, 7]
     
     global_features2 = self.global_features2_flatten(global_features) #[None, 512*7*7]
     
