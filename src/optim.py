@@ -1,3 +1,6 @@
+# 
+# Source: https://gist.github.com/ajbrock/075c0ca4036dc4d8581990 
+# Adam Optimizer that supports Mixed Precision
 
 import math
 from torch.optim.optimizer import Optimizer

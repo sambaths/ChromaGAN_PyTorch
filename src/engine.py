@@ -29,7 +29,7 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
                               grad_outputs=torch.ones(y_pred.size(), device=device, dtype=torch.half if config.MIXED_PRECISION else torch.float),
                               create_graph=True, retain_graph=True, only_inputs=True)[0]
     gradients = gradients.view(gradients.size(0), -1)
-    gradient_penalty = (((gradients+1e-16).norm(2, dim=1) - 1) ** 2).mean() * gradient_penalty_weight
+    gradient_penalty = (((gradients).norm(2, dim=1) - 1) ** 2).mean() * gradient_penalty_weight
     return gradient_penalty
   for trainL, trainAB, _ in tqdm(iter(train_loader)):
       batch += 1  
