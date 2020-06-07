@@ -35,10 +35,10 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
   for trainL, trainAB, _ in tqdm(iter(train_loader)):
       batch += 1  
 
-      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device)
+      trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device, dtype=torch.float)
 
-      trainL = torch.tensor(trainL, device=device)
-      trainAB = torch.tensor(trainAB, device=device)
+      trainL = torch.tensor(trainL, device=device, dtype=torch.float)
+      trainAB = torch.tensor(trainAB, device=device, dtype=torch.float)
       
       predictVGG = F.softmax(VGG_MODEL(trainL_3))
 

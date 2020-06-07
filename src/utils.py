@@ -68,10 +68,9 @@ def plot_some(test_data, colorization_model, device, epoch):
       filepath = config.TRAIN_DIR+filename
       batchL = batchL.reshape(1,1,224,224)
       realAB = realAB.reshape(1,2,224,224)
-      batchL_3 = torch.tensor(np.tile(batchL, [1, 3, 1, 1]))
-      batchL_3 = batchL_3.to(device)
-      batchL = torch.tensor(batchL).to(device).double()
-      realAB = torch.tensor(realAB).to(device).double()
+      batchL_3 = torch.tensor(np.tile(batchL, [1, 3, 1, 1]), dtype=torch.float, device=device)
+      batchL = torch.tensor(batchL, dtype=torch.float, device=device)
+      realAB = torch.tensor(realAB, dtype=torch.float, device=device)
 
       colorization_model.eval()
       batch_predAB, _ = colorization_model(batchL_3)
