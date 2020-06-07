@@ -40,6 +40,5 @@ if not USE_TPU:
   else:
     DEVICE = 'cpu'
 
-DEVICE='cpu'
 if DEVICE=='cpu' and MIXED_PRECISION:
   raise ValueError('To use mixed precision you need GPU')
