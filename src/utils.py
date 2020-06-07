@@ -131,7 +131,7 @@ def load_checkpoint(checkpoint_directory, netG, optG, netD, optD, device):
 
         optD.load_state_dict(checkpoint['discriminator_optimizer'])
         print('Loaded States !!!')
-        print(f'It looks like the this states belong to epoch {epoch_checkpoint-1}.')
+        print(f'It looks like this states belong to epoch {epoch_checkpoint-1}.')
         print(f'so the model will train for {config.NUM_EPOCHS - (epoch_checkpoint-1)} more epochs.')
         print(f'If you want to train for more epochs, change the "NUM_EPOCHS" in config.py !!')
         

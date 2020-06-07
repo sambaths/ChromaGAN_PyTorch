@@ -49,10 +49,10 @@ def map_fn(index=None, flags=None):
     DEVICE = config.DEVICE
 
 
-  netG = model.colorization_model().double()
-  netD = model.discriminator_model().double()
+  netG = model.colorization_model()
+  netD = model.discriminator_model()
 
-  VGG_modelF = torchvision.models.vgg16(pretrained=True).double()
+  VGG_modelF = torchvision.models.vgg16(pretrained=True)
   VGG_modelF.requires_grad_(False)
 
   netG = netG.to(DEVICE)

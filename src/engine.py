@@ -20,9 +20,9 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
 
   def wgan_loss(prediction, real_or_not):
     if real_or_not:
-      return -torch.mean(prediction.float())
+      return -torch.mean(prediction)
     else:
-      return torch.mean(prediction.float())
+      return torch.mean(prediction)
 
   def gp_loss(y_pred, averaged_samples, gradient_penalty_weight):
 
@@ -37,9 +37,8 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
 
       trainL_3 = torch.tensor(np.tile(trainL.cpu(), [1,3,1,1]), device=device)
 
-      trainL = torch.tensor(trainL, device=device).double()
-      trainAB = torch.tensor(trainAB, device=device).double()
-      # trainL_3 = trainL_3.to(device).double()
+      trainL = torch.tensor(trainL, device=device)
+      trainAB = torch.tensor(trainAB, device=device)
       
       predictVGG = F.softmax(VGG_MODEL(trainL_3))
 
@@ -47,9 +46,9 @@ def train(train_loader, GAN_Model, netD, VGG_MODEL, optG, optD, device, losses):
       optG.zero_grad()
       predAB, classVector, discpred = GAN_Model(trainL, trainL_3)
       D_G_z1 = discpred.mean().item()
-      Loss_KLD = nn.KLDivLoss(size_average='False')(classVector.log().float(), predictVGG.detach().float()) * 0.003
-      Loss_MSE = nn.MSELoss()(predAB.float(), trainAB.float())
-      Loss_WL = wgan_loss(discpred.float(), True) * 0.1 
+      Loss_KLD = nn.KLDivLoss(size_average='False')(classVector.log(), predictVGG.detach()) * 0.003
+      Loss_MSE = nn.MSELoss()(predAB, trainAB)
+      Loss_WL = wgan_loss(discpred, True) * 0.1 
       Loss_G = Loss_KLD + Loss_MSE + Loss_WL
       Loss_G.backward()
 

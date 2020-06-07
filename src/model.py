@@ -36,7 +36,6 @@ class colorization_model(nn.Module):
 
     self.VGG_model = torchvision.models.vgg16(pretrained=True)
     self.VGG_model = nn.Sequential(*list(self.VGG_model.features.children())[:-8]) #[None, 512, 28, 28]
-    self.VGG_model = self.VGG_model.double()
     self.relu = nn.ReLU()
     self.lrelu = nn.LeakyReLU(0.3)
     self.global_features_conv1 = nn.Conv2d(512, 512, kernel_size=(3,3), padding=1, stride=(2,2), bias=bias) #[None, 512, 14, 14]
@@ -83,7 +82,7 @@ class colorization_model(nn.Module):
 
     # VGG Without Top Layers
 
-    vgg_out = self.VGG_model(torch.tensor(input_img).double())
+    vgg_out = self.VGG_model(torch.tensor(input_img))
 
     #Global Features
     
@@ -111,7 +110,7 @@ class colorization_model(nn.Module):
     global_featureClass = self.softmax(self.global_featuresClass_dense3(global_featureClass))#[None, 1000]
     
     # Mid Level Features
-    midlevel_features = self.midlevel_conv1(vgg_out.double()) #[None, 512, 28, 28]
+    midlevel_features = self.midlevel_conv1(vgg_out) #[None, 512, 28, 28]
     midlevel_features = self.midlevel_bn1(midlevel_features) #[None, 512, 28, 28]
     midlevel_features = self.midlevel_conv2(midlevel_features) #[None, 256, 28, 28]
     midlevel_features = self.midlevel_bn2(midlevel_features) #[None, 256, 28, 28]

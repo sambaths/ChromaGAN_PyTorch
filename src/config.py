@@ -37,4 +37,3 @@ if not USE_TPU:
   else:
     DEVICE = 'cpu'
 
-
